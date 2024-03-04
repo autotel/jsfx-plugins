@@ -4,9 +4,10 @@ tags: x/y, x, y, pad, control, utility
 
 slider1:0<-1,1>x
 slider2:0<-1,1>y
-
+slider3:0<0,1.5>center dist
 out_pin:left
 out_pin:right
+out_pin:distance
 @init 
 frozen = false;
 old_mouse_cap = 0;
@@ -79,7 +80,15 @@ function toggleCircle(x,y,r) (
   ):(
     gfx_set(0.6,0,0,1);
   );
-  
+  this.mouseIsInside?(
+    this.current_value?(
+      gfx_setcursor(429);  
+    ):(
+      gfx_setcursor(430);
+    );
+  ):(
+    gfx_setcursor(0);
+  );
   gfx_circle(x,y,r,this.mouseIsInside); 
 
   
@@ -90,20 +99,38 @@ function toggleCircle(x,y,r) (
   this.current_value;
 );
 
-(!frozen) ? (
+(!frozen) ? (  
+  gfx_set(1,1,1,0.2);
+  cx = screenCoordX(0);
+  cy = screenCoordY(0);
+  gfx_line(0, cy, gfx_w, cy);
+  gfx_line(cx, 0, cx, gfx_h);
   val_x = worldX(mouse_x);
   val_y = worldY(mouse_y);
+  val_d = distance(0,0,val_x, val_y);
   circle_x = screenCoordX(val_x);
   circle_y = screenCoordY(val_y);
   slider1 = val_x;
   slider2 = val_y;
+  slider3 = val_d;
 );
 
 frozen = toggleCircle(circle_x,circle_y, 10);
 
 @slider
 
+(frozen) ? (  
+  val_x = slider1;
+  val_y = slider2;
+  val_d = slider3;
+  circle_x = screenCoordX(val_x);
+  circle_y = screenCoordY(val_y);
+  val_d = distance(0,0,val_x, val_y);
+  slider3 = val_d;
+);
+
 @sample
 
 spl0 = val_x;
 spl1 = val_y;
+spl2 = val_d;
