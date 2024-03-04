@@ -1,0 +1,54 @@
+desc: x/y pad utility to control stuff
+//tags: x/y, x, y, pad, control, utility 
+//author: autotel
+
+slider1:0<-1,1>x
+slider2:0<-1,1>y
+
+out_pin:left
+out_pin:right
+
+@gfx
+function clamp(in)(
+  (in > 1)?( 
+    in = 1; 
+  ):(
+    (in < 0)?(
+      in = 0;
+    );
+  );
+  in
+);
+function screenCoordX(world) (
+  (world + 1) * gfx_w / 2;
+);
+function screenCoordY(world) (
+  (world + 1) * gfx_h / 2;
+);
+function worldX(screen) (
+  clamp(screen / gfx_w) * 2 - 1;
+);
+function worldY(screen) (
+  clamp(screen / gfx_h) * 2 - 1;
+);
+val_x = worldX(mouse_x);
+val_y = worldY(mouse_y);
+circle_x = screenCoordX(val_x);
+circle_y = screenCoordY(val_y);
+slider1 = val_x;
+slider2 = val_y;
+
+gfx_setfont(1,"consolas",18);
+gfx_set(1,1,1,1);
+gfx_circle(
+  (circle_x), 
+  (circle_y), 
+  10
+); 
+
+@slider
+
+@sample
+
+spl0 = val_x;
+spl1 = val_y;
