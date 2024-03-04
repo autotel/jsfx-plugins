@@ -1,5 +1,5 @@
 desc: x/y pad utility to control stuff
-//tags: x/y, x, y, pad, control, utility 
+tags: x/y, x, y, pad, control, utility 
 //author: autotel
 
 slider1:0<-1,1>x
@@ -7,8 +7,9 @@ slider2:0<-1,1>y
 
 out_pin:left
 out_pin:right
-
-@gfx
+@init 
+frozen = false;
+old_mouse_cap = 0;
 function clamp(in)(
   (in > 1)?( 
     in = 1; 
@@ -31,20 +32,74 @@ function worldX(screen) (
 function worldY(screen) (
   clamp(screen / gfx_h) * 2 - 1;
 );
-val_x = worldX(mouse_x);
-val_y = worldY(mouse_y);
-circle_x = screenCoordX(val_x);
-circle_y = screenCoordY(val_y);
-slider1 = val_x;
-slider2 = val_y;
-
+function distance(x1,y1,x2,y2) (
+  c1 = x1 - x2;
+  c2 = y1 - y2;
+  sqrt(c1*c1 + c2*c2);
+);
+@gfx
 gfx_setfont(1,"consolas",18);
 gfx_set(1,1,1,1);
-gfx_circle(
-  (circle_x), 
-  (circle_y), 
-  10
-); 
+
+
+function toggleButton(x,y, label) (
+  gfx_setfont(1,"consolas",18);
+  gfx_set(1,1,1,1);
+  gfx_x = x + 8;
+  gfx_y = y;
+  w=1;
+  h=1;
+  gfx_measurestr(label,w,h);
+  w = w+16;
+  this.mouseIsInside = (
+    mouse_x > x && mouse_x - w < x &&
+    mouse_y > y && mouse_y - h < y
+  );
+  (!this.current_value)?(
+    gfx_set(0.6,0.6,0.6,this.mouseIsInside);
+  ):(
+    gfx_set(0.6,0,0,1);
+  );
+  gfx_rect(x,y,w,h);
+  gfx_set(1,1,1,1);
+  gfx_rect(x,y,w,h,false);
+  gfx_drawstr(label);
+  
+  this.mouseIsInside && mouse_cap == 1 && old_mouse_cap == 0 ? (
+    this.current_value= !this.current_value;
+  );
+  old_mouse_cap = mouse_cap;
+  this.current_value;
+);
+
+function toggleCircle(x,y,r) (
+  this.mouseIsInside = distance(mouse_x, mouse_y, x, y) < r;
+  (!this.current_value)?(
+    gfx_set(0.6,0.6,this.mouseIsInside,1);
+  ):(
+    gfx_set(0.6,0,0,1);
+  );
+  
+  gfx_circle(x,y,r,this.mouseIsInside); 
+
+  
+  this.mouseIsInside && mouse_cap == 1 && old_mouse_cap == 0 ? (
+    this.current_value= !this.current_value;
+  );
+  old_mouse_cap = mouse_cap;
+  this.current_value;
+);
+
+(!frozen) ? (
+  val_x = worldX(mouse_x);
+  val_y = worldY(mouse_y);
+  circle_x = screenCoordX(val_x);
+  circle_y = screenCoordY(val_y);
+  slider1 = val_x;
+  slider2 = val_y;
+);
+
+frozen = toggleCircle(circle_x,circle_y, 10);
 
 @slider
 
